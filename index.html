@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スケジュール表メーカー</title>
+  <!-- フォントの読み込み（日本語 ＆ 英語筆記体・ポップ体） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@600;700&family=Great+Vibes&family=M+PLUS+Rounded+1c:wght@700;800&family=Montserrat:wght@800;900&family=Pacifico&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+  
+  <!-- CSSファイルの読み込み -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>スケジュール表メーカー</h1>
+
+  <!-- プレビュー表示エリア -->
+  <div class="preview-area">
+    <canvas id="scheduleCanvas" width="960" height="540"></canvas>
+  </div>
+
+  <!-- 操作パネル -->
+  <div class="controls">
+
+    <!-- 開始日設定 -->
+    <div class="control-group">
+      <label for="startDate">月曜日の日付:</label>
+      <input type="date" id="startDate">
+    </div>
+
+    <!-- タイトル用フォント -->
+    <div class="control-group">
+      <label for="titleFontSelect">タイトルフォント:</label>
+      <select id="titleFontSelect">
+        <option value="'Pacifico', cursive">筆記体① (Pacifico)</option>
+        <option value="'Dancing Script', cursive">筆記体② (Dancing Script)</option>
+        <option value="'Great Vibes', cursive">筆記体③ (Great Vibes)</option>
+        <option value="'Fredoka', sans-serif">ポップ (Fredoka)</option>
+        <option value="'Montserrat', sans-serif">モダン太字 (Montserrat)</option>
+        <option value="'M PLUS Rounded 1c', sans-serif">丸ゴシック (M PLUS Rounded)</option>
+      </select>
+    </div>
+
+    <!-- 本文用フォント -->
+    <div class="control-group">
+      <label for="bodyFontSelect">本文フォント:</label>
+      <select id="bodyFontSelect">
+        <option value="'M PLUS Rounded 1c', sans-serif">丸ゴシック (M PLUS Rounded)</option>
+        <option value="'Zen Maru Gothic', sans-serif">ぽっちゃり丸ゴシック (Zen Maru)</option>
+        <option value="'Montserrat', 'ヒラギノ角ゴ ProN', sans-serif">ゴシック体 / モダン</option>
+        <option value="'Yu Mincho', '游明朝', serif">明朝体 (Yu Mincho)</option>
+      </select>
+    </div>
+
+    <!-- メインテーマカラー選択 -->
+    <div class="control-group">
+      <label for="themeColorPicker">メインテーマ:</label>
+      <div class="color-picker" id="colorPicker">
+        <button class="color-btn active" style="background:#85c7f2;" data-color="#85c7f2"></button>
+        <button class="color-btn" style="background:#ff85a1;" data-color="#ff85a1"></button>
+        <button class="color-btn" style="background:#ffb703;" data-color="#ffb703"></button>
+        <button class="color-btn" style="background:#2ec4b6;" data-color="#2ec4b6"></button>
+        <button class="color-btn" style="background:#708dff;" data-color="#708dff"></button>
+        <button class="color-btn" style="background:#b5838d;" data-color="#b5838d"></button>
+        <button class="color-btn" style="background:#4a4e69;" data-color="#4a4e69"></button>
+        <input type="color" id="themeColorPicker" value="#85c7f2" title="自由なカラーを選択">
+      </div>
+    </div>
+
+    <!-- キャラクター画像エリア設定 -->
+    <div class="sub-section">
+      <div class="control-group">
+        <label for="imageUpload">キャラクター画像:</label>
+        <input type="file" id="imageUpload" accept="image/*">
+        <span class="hint-text">※エリア内ドラッグで移動、ホイールで拡縮</span>
+      </div>
+
+      <div class="control-group" id="imageControls" style="display: none;">
+        <label for="zoomRange">画像サイズ調整:</label>
+        <input type="range" id="zoomRange" min="0.2" max="3.0" step="0.05" value="1.0">
+        <button type="button" class="btn-action" id="resetImgBtn">位置・サイズリセット</button>
+      </div>
+
+      <div class="control-group">
+        <label for="bgTypeSelect">エリア背景設定:</label>
+        <select id="bgTypeSelect">
+          <option value="color">単色カラー指定</option>
+          <option value="image">背景画像（柄など）をアップ</option>
+        </select>
+        <div id="bgColorContainer">
+          <input type="color" id="areaBgColor" value="#ffffff" title="右側エリアの背景色">
+        </div>
+        <div id="bgImageContainer" style="display: none;">
+          <input type="file" id="bgImageUpload" accept="image/*">
+          <button type="button" class="btn-action" id="clearBgImgBtn" style="display:none;">背景画像を削除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 曜日ごとの予定入力 -->
+    <div class="schedule-inputs" id="scheduleInputs">
+      <!-- JSで動的に生成 -->
+    </div>
+
+    <!-- 保存ボタン -->
+    <button class="btn-download" id="downloadBtn">名前を付けて画像を保存する</button>
+
+  </div>
+</div>
+
+<script>
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const dayNames = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
+
+  let currentColor = '#85c7f2';
+  let titleFont = "'Pacifico', cursive";
+  let bodyFont = "'M PLUS Rounded 1c', sans-serif";
+  let uploadedImage = null;
+  let bgImage = null;
+  let areaBgColor = '#ffffff';
+  let bgType = 'color';
+
+  let imgX = 750;
+  let imgY = 220;
+  let imgScale = 1.0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  const canvas = document.getElementById('scheduleCanvas');
+  const ctx = canvas.getContext('2d');
+  const startDateInput = document.getElementById('startDate');
+  const titleFontSelect = document.getElementById('titleFontSelect');
+  const bodyFontSelect = document.getElementById('bodyFontSelect');
+  const themeColorPicker = document.getElementById('themeColorPicker');
+  const scheduleInputsContainer = document.getElementById('scheduleInputs');
+  const zoomRange = document.getElementById('zoomRange');
+  const bgTypeSelect = document.getElementById('bgTypeSelect');
+  const areaBgColorInput = document.getElementById('areaBgColor');
+  const bgImageUpload = document.getElementById('bgImageUpload');
+  const clearBgImgBtn = document.getElementById('clearBgImgBtn');
+
+  function getInitialMonday() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    return monday.toISOString().split('T')[0];
+  }
+
+  function createInputs() {
+    startDateInput.value = getInitialMonday();
+
+    dayNames.forEach((dayName, idx) => {
+      const row = document.createElement('div');
+      row.className = 'day-row';
+      row.innerHTML = `
+        <span class="day-label">${dayName}:</span>
+        <input type="text" class="text-input" id="text-${idx}" placeholder="${dayName}の予定">
+        <input type="text" class="time-input" id="time-${idx}" placeholder="時間">
+        <button type="button" class="btn-off" onclick="setOff(${idx})">おやすみ</button>
+      `;
+      scheduleInputsContainer.appendChild(row);
+    });
+
+    document.querySelectorAll('input, select').forEach(input => {
+      if(input.id !== 'themeColorPicker' && input.id !== 'areaBgColor') {
+        input.addEventListener('input', drawSchedule);
+      }
+    });
+  }
+
+  function setOff(idx) {
+    document.getElementById(`text-${idx}`).value = 'おやすみ';
+    document.getElementById(`time-${idx}`).value = '';
+    drawSchedule();
+  }
+
+  titleFontSelect.addEventListener('change', (e) => {
+    titleFont = e.target.value;
+    document.fonts.ready.then(() => drawSchedule());
+  });
+
+  bodyFontSelect.addEventListener('change', (e) => {
+    bodyFont = e.target.value;
+    document.fonts.ready.then(() => drawSchedule());
+  });
+
+  document.getElementById('colorPicker').addEventListener('click', (e) => {
+    if (e.target.classList.contains('color-btn')) {
+      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      currentColor = e.target.getAttribute('data-color');
+      themeColorPicker.value = currentColor;
+      drawSchedule();
+    }
+  });
+
+  themeColorPicker.addEventListener('input', (e) => {
+    currentColor = e.target.value;
+    document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+    drawSchedule();
+  });
+
+  bgTypeSelect.addEventListener('change', (e) => {
+    bgType = e.target.value;
+    if (bgType === 'color') {
+      document.getElementById('bgColorContainer').style.display = 'block';
+      document.getElementById('bgImageContainer').style.display = 'none';
+    } else {
+      document.getElementById('bgColorContainer').style.display = 'none';
+      document.getElementById('bgImageContainer').style.display = 'flex';
+    }
+    drawSchedule();
+  });
+
+  areaBgColorInput.addEventListener('input', (e) => {
+    areaBgColor = e.target.value;
+    drawSchedule();
+  });
+
+  bgImageUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          bgImage = img;
+          clearBgImgBtn.style.display = 'inline-block';
+          drawSchedule();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  clearBgImgBtn.addEventListener('click', () => {
+    bgImage = null;
+    bgImageUpload.value = '';
+    clearBgImgBtn.style.display = 'none';
+    drawSchedule();
+  });
+
+  document.getElementById('imageUpload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          uploadedImage = img;
+          resetImagePosition();
+          document.getElementById('imageControls').style.display = 'flex';
+          drawSchedule();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  function resetImagePosition() {
+    if (!uploadedImage) return;
+    const baseScale = Math.max(360 / uploadedImage.width, 460 / uploadedImage.height);
+    imgScale = baseScale;
+    zoomRange.value = 1.0;
+    imgX = 750;
+    imgY = 220;
+  }
+
+  document.getElementById('resetImgBtn').addEventListener('click', () => {
+    resetImagePosition();
+    drawSchedule();
+  });
+
+  zoomRange.addEventListener('input', (e) => {
+    if (!uploadedImage) return;
+    const baseScale = Math.max(360 / uploadedImage.width, 460 / uploadedImage.height);
+    imgScale = baseScale * parseFloat(e.target.value);
+    drawSchedule();
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (x >= 560 && x <= 940 && y >= 20 && y <= 520) {
+      isDragging = true;
+      dragStartX = x - imgX;
+      dragStartY = y - imgY;
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    imgX = x - dragStartX;
+    imgY = y - dragStartY;
+    drawSchedule();
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  canvas.addEventListener('wheel', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (x >= 560 && x <= 940 && y >= 20 && y <= 520 && uploadedImage) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+      const currentSliderVal = parseFloat(zoomRange.value);
+      const newVal = Math.min(Math.max(currentSliderVal + delta, 0.2), 3.0);
+      zoomRange.value = newVal;
+
+      const baseScale = Math.max(360 / uploadedImage.width, 460 / uploadedImage.height);
+      imgScale = baseScale * newVal;
+      drawSchedule();
+    }
+  }, { passive: false });
+
+  function drawSchedule() {
+    ctx.fillStyle = '#f0f4f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = currentColor;
+    ctx.fillRect(20, 20, 520, 500);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(560, 20, 380, 500);
+    ctx.clip();
+
+    if (bgType === 'image' && bgImage) {
+      const scale = Math.max(380 / bgImage.width, 500 / bgImage.height);
+      const x = 560 + (380 - bgImage.width * scale) / 2;
+      const y = 20 + (500 - bgImage.height * scale) / 2;
+      ctx.drawImage(bgImage, x, y, bgImage.width * scale, bgImage.height * scale);
+    } else {
+      ctx.fillStyle = areaBgColor;
+      ctx.fillRect(560, 20, 380, 500);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(570, 30, 360, 480);
+    ctx.clip();
+
+    if (uploadedImage) {
+      const drawW = uploadedImage.width * imgScale;
+      const drawH = uploadedImage.height * imgScale;
+      const drawX = imgX - drawW / 2;
+      const drawY = imgY - drawH / 2;
+      ctx.drawImage(uploadedImage, drawX, drawY, drawW, drawH);
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(570, 30, 360, 480);
+      ctx.fillStyle = '#666666';
+      ctx.font = `bold 16px ${bodyFont}`;
+      ctx.textAlign = 'center';
+      ctx.fillText('キャラクター画像をアップロード', 750, 250);
+      ctx.font = `12px ${bodyFont}`;
+      ctx.fillText('(ドラッグで移動 / ホイールで拡縮)', 750, 280);
+    }
+    ctx.restore();
+
+    drawFancyTitle(750, 435, 'Weekly', 'SCHEDULE');
+
+    const startDateVal = startDateInput.value;
+    const baseDate = startDateVal ? new Date(startDateVal) : new Date();
+    const endDate = new Date(baseDate);
+    endDate.setDate(baseDate.getDate() + 6);
+    const dateRangeStr = `${baseDate.getMonth() + 1}/${baseDate.getDate()} - ${endDate.getMonth() + 1}/${endDate.getDate()}`;
+    
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(660, 485, 180, 28, 14);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = currentColor;
+    ctx.font = `bold 16px ${bodyFont}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(dateRangeStr, 750, 505);
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(baseDate);
+      currentDate.setDate(baseDate.getDate() + i);
+
+      const y = 35 + i * 68;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(55, y + 25, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = currentColor;
+      ctx.font = `bold 16px ${bodyFont}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(currentDate.getDate(), 55, y + 31);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `bold 11px ${bodyFont}`;
+      ctx.textAlign = 'left';
+      ctx.fillText(days[i], 85, y + 15);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(85, y + 20, 310, 32, 16);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.beginPath();
+      ctx.roundRect(405, y + 20, 110, 32, 16);
+      ctx.fill();
+
+      const textVal = document.getElementById(`text-${i}`)?.value || '';
+      const timeVal = document.getElementById(`time-${i}`)?.value || '';
+
+      ctx.fillStyle = '#333333';
+      ctx.font = `bold 14px ${bodyFont}`;
+      ctx.textAlign = 'left';
+      ctx.fillText(textVal, 100, y + 41);
+
+      ctx.fillStyle = '#555555';
+      ctx.font = `12px ${bodyFont}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(timeVal, 460, y + 41);
+    }
+  }
+
+  function drawFancyTitle(x, y, line1, line2) {
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
+
+    ctx.font = `42px ${titleFont}`;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 10;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(line1, x, y - 70);
+    ctx.fillStyle = currentColor;
+    ctx.fillText(line1, x, y - 70);
+
+    ctx.font = `57px ${titleFont}`;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 12;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(line2, x, y + 10);
+    ctx.fillStyle = currentColor;
+    ctx.fillText(line2, x, y + 10);
+
+    ctx.restore();
+  }
+
+  document.getElementById('downloadBtn').addEventListener('click', async () => {
+    const filename = `schedule_${startDateInput.value}.png`;
+    
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{
+            description: 'PNG Image',
+            accept: { 'image/png': ['.png'] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('ファイル保存エラー:', err);
+        } else {
+          return;
+        }
+      }
+    }
+
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  document.fonts.ready.then(() => {
+    createInputs();
+    drawSchedule();
+  });
+</script>
+
+</body>
+</html>

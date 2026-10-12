@@ -1,0 +1,165 @@
+body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    background-color: #f4f4f7;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  
+  .preview-area {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #eaedef;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: grab;
+  }
+  
+  canvas:active {
+    cursor: grabbing;
+  }
+  
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .control-group label {
+    font-weight: bold;
+    width: 140px;
+  }
+  
+  input[type="text"], input[type="date"], select, input[type="color"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  
+  input[type="color"] {
+    width: 50px;
+    height: 38px;
+    padding: 2px;
+    cursor: pointer;
+  }
+  
+  .color-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .color-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  
+  .color-btn.active {
+    border-color: #333;
+    transform: scale(1.1);
+  }
+  
+  .schedule-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .day-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .day-label {
+    width: 60px;
+    font-weight: bold;
+  }
+  
+  .text-input {
+    flex: 1;
+  }
+  
+  .time-input {
+    width: 80px;
+  }
+  
+  .btn-off, .btn-action {
+    padding: 8px 12px;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .btn-off:hover, .btn-action:hover {
+    background-color: #d0d0d0;
+  }
+  
+  .btn-download {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  .btn-download:hover {
+    background-color: #0056b3;
+  }
+  
+  .hint-text {
+    font-size: 12px;
+    color: #666;
+    margin-left: 5px;
+  }
+  
+  .sub-section {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
