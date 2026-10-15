@@ -30,6 +30,7 @@ const bgTypeSelect = document.getElementById('bgTypeSelect');
 const areaBgColorInput = document.getElementById('areaBgColor');
 const bgImageUpload = document.getElementById('bgImageUpload');
 const clearBgImgBtn = document.getElementById('clearBgImgBtn');
+const illustCaptionInput = document.getElementById('illustCaption');
 
 function getInitialMonday() {
   const d = new Date();
@@ -97,8 +98,18 @@ function updateInputLabels() {
 }
 
 function setOff(idx) {
-  document.getElementById(`text-${idx}`).value = 'おやすみ';
-  document.getElementById(`time-${idx}`).value = '';
+  const textInput = document.getElementById(`text-${idx}`);
+  const timeInput = document.getElementById(`time-${idx}`);
+  if (textInput.value === 'おやすみ') {
+    textInput.value = '';
+    timeInput.disabled = false;
+    timeInput.style.opacity = '1';
+  } else {
+    textInput.value = 'おやすみ';
+    timeInput.value = '';
+    timeInput.disabled = true;
+    timeInput.style.opacity = '0.4';
+  }
   drawSchedule();
 }
 
@@ -302,6 +313,33 @@ function drawSchedule() {
   }
   ctx.restore();
 
+  // --- キャラクター画像表示領域の右上に合わせたひとこと・クレジット欄の描画 ---
+  const captionText = illustCaptionInput.value.trim();
+  if (captionText) {
+    ctx.save();
+    ctx.font = `bold 12px ${bodyFont}`;
+    const textWidth = ctx.measureText(captionText).width;
+    const badgeWidth = Math.max(textWidth + 24, 90);
+    
+    // 画像表示領域の右端(570 + 360 = 930)から少し内側に収まるように配置
+    const badgeX = 920 - badgeWidth; 
+    const badgeY = 40; // 画像表示枠の上のほう（右上）
+
+    // 白背景バッジ ＋ 輪郭線
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(badgeX, badgeY, badgeWidth, 26, 13);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#333333';
+    ctx.textAlign = 'center';
+    ctx.fillText(captionText, badgeX + badgeWidth / 2, badgeY + 18);
+    ctx.restore();
+  }
+
   drawFancyTitle(750, 435, 'Weekly', 'SCHEDULE');
 
   const weekInfo = getWeekDayInfo(startDateInput.value);
@@ -309,14 +347,18 @@ function drawSchedule() {
   const endDate = weekInfo[6].date;
   const dateRangeStr = `${startDate.getMonth() + 1}/${startDate.getDate()} - ${endDate.getMonth() + 1}/${endDate.getDate()}`;
   
+  // 右下の期間バッジ
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,0.15)';
   ctx.shadowBlur = 6;
   ctx.shadowOffsetY = 2;
   ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.roundRect(660, 485, 180, 28, 14);
   ctx.fill();
+  ctx.stroke();
   ctx.restore();
 
   ctx.fillStyle = currentColor;
@@ -331,43 +373,89 @@ function drawSchedule() {
     const y = 35 + i * 68;
 
     ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(55, y + 25, 20, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 
     ctx.fillStyle = currentColor;
     ctx.font = `bold 16px ${bodyFont}`;
     ctx.textAlign = 'center';
     ctx.fillText(currentDate.getDate(), 55, y + 31);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.font = `bold 11px ${bodyFont}`;
     ctx.textAlign = 'left';
     ctx.fillText(info.enName, 85, y + 15);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.roundRect(85, y + 20, 310, 32, 16);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.beginPath();
-    ctx.roundRect(405, y + 20, 110, 32, 16);
-    ctx.fill();
-
     const textVal = document.getElementById(`text-${i}`)?.value || '';
     const timeVal = document.getElementById(`time-${i}`)?.value || '';
+    const isOff = (textVal === 'おやすみ');
 
-    ctx.fillStyle = '#333333';
-    ctx.font = `bold 14px ${bodyFont}`;
-    ctx.textAlign = 'left';
-    ctx.fillText(textVal, 100, y + 41);
+    if (isOff) {
+      ctx.save();
+      ctx.fillStyle = hexToRgba(currentColor, 0.35);
+      ctx.strokeStyle = adjustBrightness(currentColor, -30);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(85, y + 20, 430, 32, 16);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.fillStyle = '#555555';
-    ctx.font = `12px ${bodyFont}`;
-    ctx.textAlign = 'center';
-    ctx.fillText(timeVal, 460, y + 41);
+      ctx.fillStyle = adjustBrightness(currentColor, -70);
+      ctx.font = `bold 14px ${bodyFont}`;
+      ctx.textAlign = 'center';
+      ctx.fillText('おやすみ', 300, y + 41);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1.5;
+      
+      ctx.beginPath();
+      ctx.roundRect(85, y + 20, 310, 32, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(405, y + 20, 110, 32, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#333333';
+      ctx.font = `bold 14px ${bodyFont}`;
+      ctx.textAlign = 'left';
+      ctx.fillText(textVal, 100, y + 41);
+
+      ctx.fillStyle = '#555555';
+      ctx.font = `12px ${bodyFont}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(timeVal, 460, y + 41);
+    }
   }
+}
+
+function hexToRgba(hex, alpha) {
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+}
+
+function adjustBrightness(hex, percent) {
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  let num = parseInt(c, 16);
+  let r = (num >> 16) + percent;
+  let g = ((num >> 8) & 0x00ff) + percent;
+  let b = (num & 0x0000ff) + percent;
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+  return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
 }
 
 function drawFancyTitle(x, y, line1, line2) {
