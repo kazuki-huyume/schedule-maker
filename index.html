@@ -4,12 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Maker</title>
-  <!-- フォントの読み込み（日本語 ＆ 英語筆記体・ポップ体） -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@600;700&family=Great+Vibes&family=M+PLUS+Rounded+1c:wght@700;800&family=Montserrat:wght@800;900&family=Pacifico&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
-  
-  <!-- CSSファイルの読み込み -->
   <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -17,21 +14,25 @@
 <div class="container">
   <h1>Weekly Maker</h1>
 
-  <!-- プレビュー表示エリア -->
   <div class="preview-area">
     <canvas id="scheduleCanvas" width="960" height="540"></canvas>
   </div>
 
-  <!-- 操作パネル -->
   <div class="controls">
 
-    <!-- 開始日設定 -->
+    <!-- テンプレート選択 -->
+    <div class="control-group">
+      <label for="templateSelect">テンプレート:</label>
+      <select id="templateSelect">
+        <!-- manifest.json から動的に生成 -->
+      </select>
+    </div>
+
     <div class="control-group">
       <label for="startDate">開始日:</label>
       <input type="date" id="startDate">
     </div>
 
-    <!-- タイトル用フォント -->
     <div class="control-group">
       <label for="titleFontSelect">タイトルフォント:</label>
       <select id="titleFontSelect">
@@ -44,7 +45,6 @@
       </select>
     </div>
 
-    <!-- 本文用フォント -->
     <div class="control-group">
       <label for="bodyFontSelect">本文フォント:</label>
       <select id="bodyFontSelect">
@@ -55,7 +55,6 @@
       </select>
     </div>
 
-    <!-- メインテーマカラー選択 -->
     <div class="control-group">
       <label for="themeColorPicker">メインテーマ:</label>
       <div class="color-picker" id="colorPicker">
@@ -70,7 +69,6 @@
       </div>
     </div>
 
-    <!-- キャラクター画像エリア設定 -->
     <div class="sub-section">
       <div class="control-group">
         <label for="imageUpload">キャラクター画像:</label>
@@ -99,26 +97,20 @@
         </div>
       </div>
 
-      <!-- イラスト領域のひとこと・クレジット欄 -->
       <div class="control-group">
         <label for="illustCaption">ひとこと/クレジット:</label>
         <input type="text" id="illustCaption" class="text-input" placeholder="例: Illust: 〇〇 / 枠:@xxx">
       </div>
     </div>
 
-    <!-- 曜日ごとの予定入力 -->
-    <div class="schedule-inputs" id="scheduleInputs">
-      <!-- JSで動的に生成 -->
-    </div>
+    <div class="schedule-inputs" id="scheduleInputs"></div>
 
-    <!-- 保存ボタン -->
     <button class="btn-download" id="downloadBtn">名前を付けて画像を保存する</button>
 
   </div>
 </div>
 
-<!-- JavaScriptファイルの読み込み -->
-<script src="./js/main.js"></script>
+<script type="module" src="./js/main.js"></script>
 
 </body>
 </html>

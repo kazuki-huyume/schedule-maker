@@ -1,0 +1,14 @@
+{
+  "templates": [
+    {
+      "id": "default",
+      "name": "デフォルト（シンプル＆ポップ）",
+      "path": "./templates/default/"
+    },
+    {
+      "id": "cyberpunk",
+      "name": "サイバーパンク風リッチ",
+      "path": "./templates/cyberpunk/"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "id": "cyberpunk",
+    "name": "サイバーパンク風リッチ",
+    "version": "1.0.0",
+    "author": "Custom",
+    "canvas": {
+      "width": 960,
+      "height": 540
+    }
+  }
