@@ -9,6 +9,31 @@
       "id": "cyberpunk",
       "name": "サイバーパンク風リッチ",
       "path": "./templates/cyberpunk/"
+    },
+    {
+      "id": "modern",
+      "name": "シック＆モダン",
+      "path": "./templates/modern/"
+    },
+    {
+      "id": "pastel",
+      "name": "パステル＆ポップ",
+      "path": "./templates/pastel/"
+    },
+    {
+      "id": "minimal",
+      "name": "マガジン＆ミニマル",
+      "path": "./templates/minimal/"
+    },
+    {
+      "id": "floating",
+      "name": "フローティング・カレンダー",
+      "path": "./templates/floating/"
+    },
+    {
+      "id": "wave_style",
+      "name": "ウェーブ＆グラデーション",
+      "path": "./templates/wave_style/"
     }
   ]
 }

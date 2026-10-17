@@ -1,0 +1,9 @@
+{
+  "id": "modern",
+  "name": "シック＆モダン",
+  "version": "1.0.0",
+  "canvas": {
+    "width": 960,
+    "height": 540
+  }
+}

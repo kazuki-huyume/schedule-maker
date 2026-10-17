@@ -1,0 +1,9 @@
+{
+  "id": "pastel",
+  "name": "パステル＆ポップ",
+  "version": "1.0.0",
+  "canvas": {
+    "width": 960,
+    "height": 540
+  }
+}
